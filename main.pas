@@ -157,7 +157,7 @@ begin
   {449 is the halfway point}
 
   FLength := 150;
-  for i := 449 to AllLines.Count - 1 do begin
+  for i := 0 to AllLines.Count - 1 do begin
     Line := AllLines[i];
     if Length(Line) > 1 then
       TFooThread.Create(StrToInt(Line[1] + Line[2]));
