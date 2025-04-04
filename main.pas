@@ -10,10 +10,10 @@ uses
 type
   TFooThread = class(TThread)
     private
-      FNote: Integer;
+      FNote, FLength: Integer;
       procedure Execute; override;
     public
-      constructor Create(Note: Integer);
+      constructor Create(Note, Length: Integer);
   end;
 
   TMIDIInstrument = (midiAcousticGrandPiano, midiBrightAcousticPiano,
@@ -69,7 +69,8 @@ type
       procedure NoteOff(NewNote, NewIntensity: Byte);
       procedure SetPlaybackVolume(PlaybackVolume: Cardinal);
       procedure Music;
-      procedure Note(a: Integer);
+      procedure Note(a, b: Integer);
+      procedure DetermineLengths(const LHLines, RHLines: TStringList; out LHMath, RHMath: TStringList);
   end;
 var
   MainForm: TMainForm;
@@ -131,17 +132,46 @@ begin
     Music;
 end;
 
-procedure TMainForm.Note(a: Integer);
+procedure TMainForm.Note(a, b: Integer);
 begin
   NoteOn(a, 127);
-  Sleep(FLength);
+  Sleep(FLength*b);
   NoteOff(a, 127);
+end;
+
+procedure TMainForm.DetermineLengths(const LHLines, RHLines: TStringList; out LHMath, RHMath: TStringList);
+var
+  i, j: Integer;
+begin
+  LHMath := TStringList.Create;
+  RHMath := TStringList.Create;
+
+  for i := 0 to LHLines.Count - 1 do begin
+    if Length(LHLines[i]) < 2 then
+      LHMath.Add('0')
+    else if i < LHLines.Count - 1 then begin
+      j := i + 1;
+      while Length(LHLines[j]) = 0 do
+        Inc(j);
+      LHMath.Add(IntToStr(j - i));
+    end;
+  end;
+
+  for i := 0 to RHLines.Count - 1 do begin
+    if Length(RHLines[i]) < 2 then
+      RHMath.Add('0')
+    else if i < RHLines.Count - 1 then begin
+      j := i + 1;
+      while Length(RHLines[j]) = 0 do
+        Inc(j);
+      RHMath.Add(IntToStr(j - i));
+    end;
+  end;
 end;
 
 procedure TMainForm.Music;
 var
-  LHLines, RHLines, AllLines: TStringList;
-  Line: string;
+  LHLines, RHLines, LHMath, RHMath: TStringList;
   i: Integer;
 begin
   LHLines := TStringList.Create;
@@ -150,41 +180,38 @@ begin
   RHLines := TStringList.Create;
   RHLines.LoadFromFile('RH.txt');
 
-  AllLines := TStringList.Create;
-  for i := 0 to LHLines.Count - 1 do
-    AllLines.Add(LHLines[i] + RHLines[i]);
-
   {449 is the halfway point}
 
+  DetermineLengths(LHLines, RHLines, LHMath, RHMath);
+
   FLength := 150;
-  for i := 0 to AllLines.Count - 1 do begin
-    Line := AllLines[i];
-    if Length(Line) > 1 then
-      TFooThread.Create(StrToInt(Line[1] + Line[2]));
-    if Length(Line) > 3 then
-      TFooThread.Create(StrToInt(Line[3] + Line[4]));
-    if Length(Line) > 5 then
-      TFooThread.Create(StrToInt(Line[5] + Line[6]));
-    if Length(Line) > 7 then
-      TFooThread.Create(StrToInt(Line[7] + Line[8]));
+  for i := 0 to LHLines.Count - 1 do begin
+    if Length(LHLines[i]) > 1 then
+      TFooThread.Create(StrToInt(LHLines[i][1] + LHLines[i][2]), StrToInt(LHMath[i]));
+    if Length(LHLines[i]) > 3 then
+      TFooThread.Create(StrToInt(LHLines[i][3] + LHLines[i][4]), StrToInt(LHMath[i]));
+    if Length(RHLines[i]) > 1 then
+      TFooThread.Create(StrToInt(RHLines[i][1] + RHLines[i][2]), StrToInt(RHMath[i]));
+    if Length(RHLines[i]) > 3 then
+      TFooThread.Create(StrToInt(RHLines[i][3] + RHLines[i][4]), StrToInt(RHMath[i]));
     Sleep(FLength);
   end;
 
   LHLines.Free();
   RHLines.Free();
-  AllLines.Free();
 end;
 
-constructor TFooThread.Create(Note: Integer);
+constructor TFooThread.Create(Note, Length: Integer);
 begin
   inherited Create(False);
   FNote := Note;
+  FLength := Length;
   FreeOnTerminate := True;
 end;
 
 procedure TFooThread.Execute;
 begin
-  MainForm.Note(FNote);
+  MainForm.Note(FNote, FLength);
 end;
 
 end.
