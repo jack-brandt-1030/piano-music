@@ -9,9 +9,9 @@ uses
 
 type
   TFooThread = class(TThread)
+    procedure Execute; override;
     private
       FNote, FLength: Integer;
-      procedure Execute; override;
     public
       constructor Create(Note, Length: Integer);
   end;
@@ -144,26 +144,35 @@ var
   i, j: Integer;
 begin
   LHMath := TStringList.Create;
-  RHMath := TStringList.Create;
-
   for i := 0 to LHLines.Count - 1 do begin
     if Length(LHLines[i]) < 2 then
       LHMath.Add('0')
-    else if i < LHLines.Count - 1 then begin
+    else if i = LHLines.Count - 1 then
+      LHMath.Add('1')
+    else begin
       j := i + 1;
-      while Length(LHLines[j]) = 0 do
-        Inc(j);
+      while j < LHLines.Count do
+        if Length(LHLines[j]) = 0 then
+          Inc(j)
+        else
+          Break;
       LHMath.Add(IntToStr(j - i));
     end;
   end;
 
+  RHMath := TStringList.Create;
   for i := 0 to RHLines.Count - 1 do begin
     if Length(RHLines[i]) < 2 then
       RHMath.Add('0')
-    else if i < RHLines.Count - 1 then begin
+    else if i = RHLines.Count - 1 then
+      RHMath.Add('1')
+    else begin
       j := i + 1;
-      while Length(RHLines[j]) = 0 do
-        Inc(j);
+      while j < RHLines.Count do
+        if Length(RHLines[j]) = 0 then
+          Inc(j)
+        else
+          Break;
       RHMath.Add(IntToStr(j - i));
     end;
   end;
@@ -173,6 +182,8 @@ procedure TMainForm.Music;
 var
   LHLines, RHLines, LHMath, RHMath: TStringList;
   i: Integer;
+  Notes: array of Integer;
+  n: Integer;
 begin
   LHLines := TStringList.Create;
   LHLines.LoadFromFile('LH.txt');
@@ -185,20 +196,49 @@ begin
   DetermineLengths(LHLines, RHLines, LHMath, RHMath);
 
   FLength := 150;
+
   for i := 0 to LHLines.Count - 1 do begin
-    if Length(LHLines[i]) > 1 then
-      TFooThread.Create(StrToInt(LHLines[i][1] + LHLines[i][2]), StrToInt(LHMath[i]));
-    if Length(LHLines[i]) > 3 then
-      TFooThread.Create(StrToInt(LHLines[i][3] + LHLines[i][4]), StrToInt(LHMath[i]));
-    if Length(RHLines[i]) > 1 then
-      TFooThread.Create(StrToInt(RHLines[i][1] + RHLines[i][2]), StrToInt(RHMath[i]));
-    if Length(RHLines[i]) > 3 then
-      TFooThread.Create(StrToInt(RHLines[i][3] + RHLines[i][4]), StrToInt(RHMath[i]));
+
+    Color := $00AAAAAA;
+    Canvas.Clear;
+
+    Notes := [];
+    if Length(LHLines[i]) > 1 then begin
+      n := StrToInt(LHLines[i][1] + LHLines[i][2]);
+      SetLength(Notes, Length(Notes)+1);
+      Notes[High(Notes)] := n;
+      TFooThread.Create(n, StrToInt(LHMath[i]));
+    end;
+    if Length(LHLines[i]) > 3 then begin
+      n := StrToInt(LHLines[i][3] + LHLines[i][4]);
+      SetLength(Notes, Length(Notes)+1);
+      Notes[High(Notes)] := n;
+      TFooThread.Create(n, StrToInt(LHMath[i]));
+    end;
+    if Length(RHLines[i]) > 1 then begin
+      n := StrToInt(RHLines[i][1] + RHLines[i][2]);
+      SetLength(Notes, Length(Notes)+1);
+      Notes[High(Notes)] := n;
+      TFooThread.Create(n, StrToInt(RHMath[i]));
+    end;
+    if Length(RHLines[i]) > 3 then begin
+      n := StrToInt(RHLines[i][3] + RHLines[i][4]);
+      SetLength(Notes, Length(Notes)+1);
+      Notes[High(Notes)] := n;
+      TFooThread.Create(n, StrToInt(RHMath[i]));
+    end;
+
+    Color := $00FFAAAA;
+    for n in Notes do
+      Canvas.FillRect(5*n, 0, 5*n+10, 50);
+
     Sleep(FLength);
   end;
 
   LHLines.Free();
   RHLines.Free();
+  LHMath.Free();
+  RHMath.Free();
 end;
 
 constructor TFooThread.Create(Note, Length: Integer);
