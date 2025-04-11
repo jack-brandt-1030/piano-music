@@ -1,11 +1,21 @@
 object MainForm: TMainForm
-  Left = 520
-  Height = 800
-  Top = 85
-  Width = 800
+  Left = 650
+  Height = 300
+  Top = 290
+  Width = 300
   Caption = 'MainForm'
+  ClientHeight = 300
+  ClientWidth = 300
   DesignTimePPI = 144
   OnCreate = FormCreate
-  OnKeyDown = FormKeyDown
   LCLVersion = '3.8.0.0'
+  object RandomButton: TButton
+    Left = 8
+    Height = 38
+    Top = 8
+    Width = 113
+    Caption = 'Play'
+    TabOrder = 0
+    OnClick = RandomButtonClick
+  end
 end
