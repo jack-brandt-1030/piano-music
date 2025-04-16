@@ -10,15 +10,17 @@ uses
 type
   TMainForm = class(TForm)
     RandomButton: TButton;
-    procedure FormCreate(Sender: TObject);
     procedure RandomButtonClick(Sender: TObject);
+  end;
+  TMusicThread = class(TThread)
     private
+      fn: Integer;
+      lh, rh, off: array of Integer;
       FLHNotes, FRHNotes, FOffList: TStringList;
       procedure DetermineLengths(const LHNotes, RHNotes: TStringList; out LHDurations, RHDurations: TStringList);
       procedure Info;
       procedure Play;
-  end;
-  TMusicThread = class(TThread)
+      procedure Visualize;
     protected
       procedure Execute; override;
   end;
@@ -71,7 +73,13 @@ begin
   end;
 end;
 
-procedure TMainForm.DetermineLengths(const LHNotes, RHNotes: TStringList; out LHDurations, RHDurations: TStringList);
+procedure TMainForm.RandomButtonClick(Sender: TObject);
+begin
+  RandomButton.Visible := False;
+  TMusicThread.Create(False);
+end;
+
+procedure TMusicThread.DetermineLengths(const LHNotes, RHNotes: TStringList; out LHDurations, RHDurations: TStringList);
 var
   i, j: Integer;
 begin
@@ -110,7 +118,7 @@ begin
   end;
 end;
 
-procedure TMainForm.Info;
+procedure TMusicThread.Info;
 var
   LHNotes, RHNotes, LHDurations, RHDurations, OffList: TStringList;
   i: Integer;
@@ -138,47 +146,73 @@ begin
   FOffList := OffList;
 end;
 
-procedure TMainForm.Play;
+procedure TMusicThread.Play;
 var
-  i, j, k: Integer;
+  i, j, n: Integer;
+  LHNotes, RHNotes, Offlist: array of Integer;
 begin
   MidiOutOpen(@MO, MIDI_DEVICE, 0, 0, CALLBACK_NULL);
 
   for i := 0 to FLHNotes.Count - 1 do begin
+
+    LHNotes := [];
+    RHNotes := [];
+    Offlist := [];
+
     j := 1;
     while j < Length(FOffList[i]) do begin
-      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_OFF, StrToInt(FOffList[i][j]+ FOffList[i][j+1]), 127));
+      n := StrToInt(FOffList[i][j]+ FOffList[i][j+1]);
+      SetLength(Offlist, Length(Offlist)+1);
+      Offlist[High(Offlist)] := n;
+      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_OFF, n, 127));
+      Inc(j, 2);
+    end;
+    j := 1;
+    while j < Length(FLHNotes[i]) do begin
+      n := StrToInt(FLHNotes[i][j] + FLHNotes[i][j+1]);
+      SetLength(LHNotes, Length(LHNotes)+1);
+      LHNotes[High(LHNotes)] := n;
+      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
+      Inc(j, 2);
+    end;
+    j := 1;
+    while j < Length(FRHNotes[i]) do begin
+      n := StrToInt(FRHNotes[i][j] + FRHNotes[i][j+1]);
+      SetLength(RHNotes, Length(RHNotes)+1);
+      RHNotes[High(RHNotes)] := n;
+      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
       Inc(j, 2);
     end;
 
-    k := 1;
-    while k < Length(FLHNotes[i]) do begin
-      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, StrToInt(FLHNotes[i][k] + FLHNotes[i][k+1]), 127));
-      Inc(k, 2);
-    end;
-    k := 1;
-    while k < Length(FRHNotes[i]) do begin
-      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, StrToInt(FRHNotes[i][k] + FRHNotes[i][k+1]), 127));
-      Inc(k, 2);
-    end;
+    lh := LHNotes;
+    rh := RHNotes;
+    off := Offlist;
+    Queue(@Visualize);
 
     Sleep(150);
   end;
 end;
 
-procedure TMainForm.FormCreate(Sender: TObject);
-begin
-  Info;
-end;
-
-procedure TMainForm.RandomButtonClick(Sender: TObject);
-begin
-  TMusicThread.Create(False);
-end;
-
 procedure TMusicThread.Execute;
 begin
-  MainForm.Play;
+  Info;
+  Play;
+end;
+
+procedure TMusicThread.Visualize;
+begin
+  for fn in off do begin
+    MainForm.Canvas.Brush.Color := clDefault;
+    MainForm.Canvas.FillRect(Rect(10*fn, 0, 10*fn+10, 50));
+  end;
+  for fn in lh do begin
+    MainForm.Canvas.Brush.Color := $00AACCEE;
+    MainForm.Canvas.FillRect(Rect(10*fn, 0, 10*fn+10, 50));
+  end;
+  for fn in rh do begin
+    MainForm.Canvas.Brush.Color := $00EECCAA;
+    MainForm.Canvas.FillRect(Rect(10*fn, 0, 10*fn+10, 50));
+  end;
 end;
 
 end.

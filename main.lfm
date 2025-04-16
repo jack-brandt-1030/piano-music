@@ -7,7 +7,6 @@ object MainForm: TMainForm
   ClientHeight = 300
   ClientWidth = 300
   DesignTimePPI = 144
-  OnCreate = FormCreate
   LCLVersion = '3.8.0.0'
   object RandomButton: TButton
     Left = 8
