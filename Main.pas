@@ -19,7 +19,6 @@ type
 
       procedure Play;
       function Read(Name: string): TArray<TArray<Integer>>;
-      procedure Draw(a: Integer; Note: Integer; Color: Integer);
     protected
       constructor Create(Sus: Boolean);
       procedure Execute; override;
@@ -27,6 +26,7 @@ type
 
   TMainForm = class(TForm)
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Draw(a: Integer; Note: Integer; Color: Integer);
   end;
 
 var
@@ -38,6 +38,9 @@ implementation
 
 uses
   MMSystem, Math;
+
+const
+  Colors = 'WBWWBWBWWBWB';
 
 {Maybe this adds to the lag?}
 
@@ -82,9 +85,22 @@ end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
+var
+  i: Integer;
 begin
-  if Key = 13 then
+  if Key = 13 then begin
+
+    for i := 21 to 108 do
+      Draw(-1, i, Ord(Colors[(i - 21) mod 12 + 1] = 'W')*clWhite+Ord(Colors[(i - 21) mod 12 + 1] = 'B')*clBlack);
+
     TMusicThread.Create(False);
+  end;
+end;
+
+procedure TMainForm.Draw(a: Integer; Note: Integer; Color: Integer);
+begin
+  Canvas.Brush.Color := Color;
+  Canvas.FillRect(Rect(10*Note, 850-20*a, 10*Note+10, 830-20*a));
 end;
 
 function TMusicThread.Read(Name: string): TArray<TArray<Integer>>;
@@ -127,14 +143,14 @@ var
 begin
   inherited;
 
-  FSong := 2;
+  FSong := 0;
 
   FFileNames := TStringList.Create;
 
   if FSong = 0 then begin
     FFileNames.Add('..\..\music\comptine\LH.txt');
     FFileNames.Add('..\..\music\comptine\RH.txt');
-    FStart := (705 - 1)*3;
+    FStart := 0;
     FMultiplier := 3;
     FSleepTime := 50;
   end else if FSong = 1 then begin
@@ -223,18 +239,18 @@ begin
           if i > FStart then begin
             for n in FLHTotal[i + a - 1] do
               if not Contains(FLHTotal[i + a], n) then
-                Draw(a, n, clBtnFace);
+                MainForm.Draw(a, n, clBtnFace);
             for n in FRHTotal[i + a - 1] do
               if not Contains(FRHTotal[i + a], n) then
-                Draw(a, n, clBtnFace);
+                MainForm.Draw(a, n, clBtnFace);
           end;
           {Draw}
           for n in FLHTotal[i + a] do
             if (i = FStart) or not Contains(FLHTotal[i + a - 1], n) then
-              Draw(a, n, $00AACCEE);
+              MainForm.Draw(a, n, $00AACCEE);
           for n in FRHTotal[i + a] do begin
             if (i = FStart) or not Contains(FRHTotal[i + a - 1], n) then
-              Draw(a, n, $00EECCAA);
+              MainForm.Draw(a, n, $00EECCAA);
           end;
         end;
       end);
@@ -244,12 +260,6 @@ begin
     for n in FOff[i + 1] do
       MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_OFF, n, 127));
   end;
-end;
-
-procedure TMusicThread.Draw(a: Integer; Note: Integer; Color: Integer);
-begin
-  MainForm.Canvas.Brush.Color := Color;
-  MainForm.Canvas.FillRect(Rect(10*Note, 850-20*a, 10*Note+10, 830-20*a));
 end;
 
 end.
