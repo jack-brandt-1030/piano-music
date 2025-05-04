@@ -8,6 +8,8 @@ uses
   Generics.Collections, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
+  TNoteArray = TArray<TArray<Integer>>;
+
   TSong = (Comptine, Sviridov, Test, Ivan);
 
   TMusicThread = class(TThread)
@@ -22,23 +24,28 @@ type
 
       {I will eventually condense these}
 
-      FLH, FRH, FOff, FLH2, FRH2: TArray<TArray<Integer>>;
+      FLH, FRH, FOff, FLH2, FRH2: TNoteArray;
       FLHD, FRHD, FLHD2, FRHD2: TArray<Integer>;
 
-      FLHTotal, FRHTotal: TArray<TArray<TArray<Integer>>>;
+      FLHTotal, FRHTotal: TArray<TNoteArray>;
 
-      procedure Read(Name: string; var Notes: TArray<TArray<Integer>>; var Durations: TArray<Integer>);
+      procedure Read(Name: string; var Notes: TNoteArray; var Durations: TArray<Integer>);
       procedure Play;
     protected
       constructor Create(Sus: Boolean; Song: TSong);
       procedure Execute; override;
   end;
 
+  TState = (sMenu, sPlaying);
+
   TMainForm = class(TForm)
     RadioGroup: TRadioGroup;
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormCreate(Sender: TObject);
     private
+      FState: TState;
       FPianoLeft: Integer;
+      procedure DrawPiano;
       procedure Draw(a, Note, Color, Height: Integer); {Reorder these parameters}
   end;
 
@@ -58,44 +65,63 @@ const
   NoteSpacing = 10;
   NoteWidth = 10;
   UnitHeight = 20;
+  LowestNote = 21;
+  HighestNote = 108;
 
-{I should make a note procedure}
+{I should make a note on procedure}
 
+//------------------------------------------------------------------------------
 function MIDIEncodeMessage(Msg, Param1, Param2: Integer): Integer;
 begin
   Result := Msg + (Param1 shl 8) + (Param2 shl 16);
 end;
 
-procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+//------------------------------------------------------------------------------
+procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  FState := sMenu;
+end;
+
+//------------------------------------------------------------------------------
+procedure TMainForm.DrawPiano;
 var
   i: Integer;
 begin
-  if Key = 13 then begin
+  FPianoLeft := ClientWidth div 2 - NoteSpacing*44;
+
+  for i := LowestNote to HighestNote do begin
+    Draw(-1, i, Ord(Colors[(i - 21) mod 12 + 1] = 'W')*clWhite+Ord(Colors[(i - 21) mod 12 + 1] = 'B')*clBlack, 1);
+    Draw(-2, i, clWhite, 1);
+  end;
+end;
+
+//------------------------------------------------------------------------------
+procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (FState = sMenu) and (Key = 13) then begin
 
     RadioGroup.Visible := False;
 
-    FPianoLeft := ClientWidth div 2 - NoteSpacing*44;
+    DrawPiano;
 
-    for i := 21 to 108 do begin
-      Draw(-1, i, Ord(Colors[(i - 21) mod 12 + 1] = 'W')*clWhite+Ord(Colors[(i - 21) mod 12 + 1] = 'B')*clBlack, 1);
-      Draw(-2, i, clWhite, 1);
-    end;
-
+    FState := sPlaying;
     TMusicThread.Create(False, TSong(RadioGroup.ItemIndex));
   end;
 end;
 
+//------------------------------------------------------------------------------
 procedure TMainForm.Draw(a, Note, Color, Height: Integer);
 begin
   Canvas.Brush.Color := Color;
   Canvas.FillRect(Rect(FPianoLeft + NoteSpacing*(Note - 21),
-                       Floor-UnitHeight*a,
+                       Floor - UnitHeight*a,
                        FPianoLeft + NoteSpacing*(Note - 21) + NoteWidth,
                        Floor - UnitHeight - UnitHeight*a - UnitHeight*(Height - 1)));
 end;
 
-procedure TMusicThread.Read(Name: string; var Notes: TArray<TArray<Integer>>; var Durations: TArray<Integer>);
+//------------------------------------------------------------------------------
+procedure TMusicThread.Read(Name: string; var Notes: TNoteArray; var Durations: TArray<Integer>);
 var
   f: TextFile;
   s: string;
@@ -157,9 +183,12 @@ begin
   SetLength(Durations, Length(Durations) + 1);
 end;
 
+//------------------------------------------------------------------------------
 constructor TMusicThread.Create(Sus: Boolean; Song: TSong);
 var
   i, j: Integer;
+
+  Notes: TNoteArray;
 begin
   inherited Create(Sus);
 
@@ -183,7 +212,7 @@ begin
     Read('..\..\music\comptine\LH.txt', FLH, FLHD);
     Read('..\..\music\comptine\RH.txt', FRH, FRHD);
   end else if FSong = Sviridov then begin
-    FStart := 0;
+    FStart := (129 - 1)*2;
     FMultiplier := 2;
     FSleepTime := 50;
     Read('..\..\music\sviridov\LH.txt', FLH, FLHD);
@@ -210,29 +239,35 @@ begin
   FLHTotal[0] := FLH;
   if Length(FLH2) > 0 then
     FLHTotal[1] := FLH2;
-  SetLength(FRHTotal, Ord(Length(FLH) > 0) + Ord(Length(FLH2) > 0));
+  SetLength(FRHTotal, Ord(Length(FRH) > 0) + Ord(Length(FRH2) > 0));
   FRHTotal[0] := FRH;
   if Length(FRH2) > 0 then
     FRHTotal[1] := FRH2;
 
+  {Also clumsy but it works}
+
   SetLength(FOff, Length(FLH) + 1);
   for i := 0 to Length(FLH) - 1 do begin
-    if (Length(FLH[i]) > 0) and (FLH[i, 0] <> -1) then
+    if (Length(FLH) > 0) and (Length(FLH[i]) > 0) and (FLH[i, 0] <> -1) then
       FOff[i + FLHD[i]] := Concat(FOff[i + FLHD[i]], FLH[i]);
-    if (Length(FLH2[i]) > 0) and (FLH2[i, 0] <> -1) then
+    if (Length(FLH2) > 0) and (Length(FLH2[i]) > 0) and (FLH2[i, 0] <> -1) then
       FOff[i + FLHD2[i]] := Concat(FOff[i + FLHD2[i]], FLH2[i]);
-    if (Length(FRH[i]) > 0) and (FRH[i, 0] <> -1) then
+    if (Length(FRH) > 0) and (Length(FRH[i]) > 0) and (FRH[i, 0] <> -1) then
       FOff[i + FRHD[i]] := Concat(FOff[i + FRHD[i]], FRH[i]);
+    if (Length(FRH2) > 0) and (Length(FRH2[i]) > 0) and (FRH2[i, 0] <> -1) then
+      FOff[i + FRHD2[i]] := Concat(FOff[i + FRHD2[i]], FRH2[i]);
   end;
 
   FreeOnTerminate := True;
 end;
 
+//------------------------------------------------------------------------------
 procedure TMusicThread.Execute;
 begin
   Play;
 end;
 
+//------------------------------------------------------------------------------
 procedure TMusicThread.Play;
 const
   MIDI_NOTE_ON = $90;
@@ -242,24 +277,24 @@ var
   MO: HMIDIOUT;
   i, n: Integer;
 
-  Notes: TArray<TArray<Integer>>;
+  Notes: TNoteArray;
 begin
   MidiOutOpen(@MO, MIDI_DEVICE, 0, 0, CALLBACK_NULL);
 
   for i := FStart to Length(FLH) - 1 do begin
-    for n in FLH[i] do
-      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
-    for n in FLH2[i] do
-      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
-    for n in FRH[i] do
-      MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
+    for Notes in FLHTotal do
+      for n in Notes[i] do
+        MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
+    for Notes in FRHTotal do
+      for n in Notes[i] do
+        MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_ON, n, 127));
 
     Queue(
       procedure
       var
         a, n: Integer;
 
-        Notes: TArray<TArray<Integer>>;
+        Notes: TNoteArray;
       begin
 
         {Erase piano keys}
@@ -267,24 +302,24 @@ begin
           MainForm.Draw(-FNoteToHeightDict[n], n, FNoteToColorDict[n], FNoteToHeightDict[n]);
 
         {Piano keys}
-        for n in FLH[i] do
-          MainForm.Draw(-FNoteToHeightDict[n], n, $00EECCAA, FNoteToHeightDict[n]);
-        for n in FLH2[i] do
-          MainForm.Draw(-FNoteToHeightDict[n], n, $00EECCAA, FNoteToHeightDict[n]);
-        for n in FRH[i] do
-          MainForm.Draw(-FNoteToHeightDict[n], n, $00AACCEE, FNoteToHeightDict[n]);
+        for Notes in FLHTotal do
+          for n in Notes[i] do
+            MainForm.Draw(-FNoteToHeightDict[n], n, $00EECCAA, FNoteToHeightDict[n]);
+        for Notes in FRHTotal do
+          for n in Notes[i] do
+            MainForm.Draw(-FNoteToHeightDict[n], n, $00AACCEE, FNoteToHeightDict[n]);
 
         for a := 0 to Min(39, Length(FLH) - 1 - i) do begin
           {Erase}
           for n in FOff[i + a] do
             MainForm.Draw(a, n, clBtnFace, 1);
           {Draw}
-          for n in FLH[i + a] do
-            MainForm.Draw(a, n, $00EECCAA, 1);
-          for n in FLH2[i + a] do
-            MainForm.Draw(a, n, $00EECCAA, 1);
-          for n in FRH[i + a] do
-            MainForm.Draw(a, n, $00AACCEE, 1);
+          for Notes in FLHTotal do
+            for n in Notes[i + a] do
+              MainForm.Draw(a, n, $00EECCAA, 1);
+          for Notes in FRHTotal do
+            for n in Notes[i + a] do
+              MainForm.Draw(a, n, $00AACCEE, 1);
         end;
       end);
 

@@ -1,6 +1,7 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu]
   Caption = 'Music'
   ClientHeight = 461
   ClientWidth = 484
@@ -12,6 +13,7 @@ object MainForm: TMainForm
   Font.Style = []
   KeyPreview = True
   WindowState = wsMaximized
+  OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   TextHeight = 15
   object RadioGroup: TRadioGroup
@@ -20,6 +22,7 @@ object MainForm: TMainForm
     Width = 300
     Height = 200
     Caption = 'Please choose'
+    ItemIndex = 0
     Items.Strings = (
       'Comptine, by Yann Tiersen'
       'Romance, by Georgy Sviridov'
