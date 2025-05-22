@@ -1,6 +1,7 @@
 Piano.dproj.local
 Piano.identcache
 Piano.res
+*.dres
 /Win32
 /__history
 /__recovery
