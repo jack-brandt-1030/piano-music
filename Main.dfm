@@ -1,7 +1,6 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu]
   Caption = 'Music'
   ClientHeight = 461
   ClientWidth = 484

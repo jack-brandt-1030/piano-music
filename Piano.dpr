@@ -1,5 +1,7 @@
 program Piano;
 
+{$R *.dres}
+
 uses
   Vcl.Forms,
   Main in 'Main.pas' {MainForm};

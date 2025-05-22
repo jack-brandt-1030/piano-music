@@ -123,18 +123,20 @@ end;
 //------------------------------------------------------------------------------
 procedure TMusicThread.Read(Name: string; var Notes: TNoteArray; var Durations: TArray<Integer>);
 var
-  f: TextFile;
+  Stream: TResourceStream;
+  sl: TStringList;
   s: string;
   Duration, LastNote, i, j: Integer;
 begin
 
   {Read the file}
 
-  AssignFile(f, Name);
-  Reset(f);
+  Stream := TResourceStream.Create(HInstance, Name, RT_RCDATA);
+  sl := TStringList.Create;
+  sl.LoadFromStream(Stream);
+
   i := 0;
-  while not Eof(f) do begin
-    ReadLn(f, s);
+  for s in sl do begin
     SetLength(Notes, Length(Notes) + FMultiplier);
     if (s <> '') and (s[1] = '*') then
       Notes[i] := [-1]
@@ -149,8 +151,6 @@ begin
     end;
     Inc(i, FMultiplier);
   end;
-  if s = '' then
-    SetLength(Notes, Length(Notes) + FMultiplier);
 
   {Determine lengths}
 
@@ -228,9 +228,9 @@ begin
     FStart := 0;
     FMultiplier := 5;
     FSleepTime := 25;
-    Read('..\..\music\ivan\LH.txt', FLH, FLHD);
-    Read('..\..\music\ivan\LH2.txt', FLH2, FLHD2);
-    Read('..\..\music\ivan\RH.txt', FRH, FRHD);
+    Read('ivan_LH', FLH, FLHD);
+    Read('ivan_LH2', FLH2, FLHD2);
+    Read('ivan_RH', FRH, FRHD);
   end;
 
   {Clumsy but it works}
