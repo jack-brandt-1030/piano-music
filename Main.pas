@@ -5,12 +5,15 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Generics.Collections, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Generics.Collections, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons,
+  System.Actions, Vcl.ActnList;
 
 type
-  TNoteArray = TArray<TArray<Integer>>;
+  TState = (sMenu, sPlaying);
 
   TSong = (Comptine, Sviridov, Test, Ivan);
+
+  TNoteArray = TArray<TArray<Integer>>;
 
   TMusicThread = class(TThread)
     private
@@ -36,17 +39,24 @@ type
       procedure Execute; override;
   end;
 
-  TState = (sMenu, sPlaying);
-
   TMainForm = class(TForm)
-    RadioGroup: TRadioGroup;
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    Panel1: TPanel;
+    Btn1: TSpeedButton;
+    Panel2: TPanel;
+    Btn2: TSpeedButton;
+    Panel3: TPanel;
+    Btn3: TSpeedButton;
+    Panel4: TPanel;
+    Btn4: TSpeedButton;
     procedure FormCreate(Sender: TObject);
+    procedure BtnClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
     private
       FState: TState;
       FPianoLeft: Integer;
       procedure DrawPiano;
       procedure Draw(a, Note, Color, Height: Integer); {Reorder these parameters}
+      procedure Restart;
   end;
 
 var
@@ -83,6 +93,28 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+procedure TMainForm.FormResize(Sender: TObject);
+var
+  n: Integer;
+  Panels: TArray<TPanel>;
+  Panel: TPanel;
+begin
+  n := (ClientWidth - 5*10) div 4;
+
+  Panels := [Panel1, Panel2, Panel3, Panel4];
+  for Panel in Panels do begin
+    Panel.Width := n;
+    Panel.Height := n;
+    Panel.Top := ClientHeight div 2 - n div 2;
+  end;
+
+  Panel1.Left := 10;
+  Panel2.Left := 10 + n + 10;
+  Panel3.Left := 10 + n + 10 + n + 10;
+  Panel4.Left := 10 + n + 10 + n + 10 + n + 10;
+end;
+
+//------------------------------------------------------------------------------
 procedure TMainForm.DrawPiano;
 var
   i: Integer;
@@ -96,18 +128,15 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TMainForm.BtnClick(Sender: TObject);
 begin
-  if (FState = sMenu) and (Key = 13) then begin
-
-    RadioGroup.Visible := False;
-
-    DrawPiano;
-
-    FState := sPlaying;
-    TMusicThread.Create(False, TSong(RadioGroup.ItemIndex));
-  end;
+  Panel1.Visible := False;
+  Panel2.Visible := False;
+  Panel3.Visible := False;
+  Panel4.Visible := False;
+  DrawPiano;
+  FState := sPlaying;
+  TMusicThread.Create(False, TSong((Sender as TSpeedButton).Tag));
 end;
 
 //------------------------------------------------------------------------------
@@ -135,9 +164,10 @@ begin
   sl := TStringList.Create;
   sl.LoadFromStream(Stream);
 
+  SetLength(Notes, sl.Count*FMultiplier);
+
   i := 0;
   for s in sl do begin
-    SetLength(Notes, Length(Notes) + FMultiplier);
     if (s <> '') and (s[1] = '*') then
       Notes[i] := [-1]
     else begin
@@ -151,6 +181,8 @@ begin
     end;
     Inc(i, FMultiplier);
   end;
+  if s = '' then
+    SetLength(Notes, Length(Notes) + 1);
 
   {Determine lengths}
 
@@ -209,21 +241,21 @@ begin
     FStart := 0;
     FMultiplier := 4;
     FSleepTime := 35;
-    Read('..\..\music\comptine\LH.txt', FLH, FLHD);
-    Read('..\..\music\comptine\RH.txt', FRH, FRHD);
+    Read('comptine_LH', FLH, FLHD);
+    Read('comptine_RH', FRH, FRHD);
   end else if FSong = Sviridov then begin
     FStart := (129 - 1)*2;
     FMultiplier := 2;
     FSleepTime := 50;
-    Read('..\..\music\sviridov\LH.txt', FLH, FLHD);
-    Read('..\..\music\sviridov\RH.txt', FRH, FRHD);
-    Read('..\..\music\sviridov\RH2.txt', FRH2, FRHD2);
+    Read('sviridov_LH', FLH, FLHD);
+    Read('sviridov_RH', FRH, FRHD);
+    Read('sviridov_RH2', FRH2, FRHD2);
   end else if FSong = Test then begin
     FStart := 0;
     FMultiplier := 1;
     FSleepTime := 100;
-    Read('..\..\music\test\LH.txt', FLH, FLHD);
-    Read('..\..\music\test\RH.txt', FRH, FRHD);
+    Read('test_LH', FLH, FLHD);
+    Read('test_RH', FRH, FRHD);
   end else if FSong = Ivan then begin
     FStart := 0;
     FMultiplier := 5;
@@ -245,6 +277,10 @@ begin
     FRHTotal[1] := FRH2;
 
   {Also clumsy but it works}
+
+  {Something is wrong here}
+  {FRH[i] ?}
+  {FLH and FRH have different lengths AH}
 
   SetLength(FOff, Length(FLH) + 1);
   for i := 0 to Length(FLH) - 1 do begin
@@ -328,6 +364,21 @@ begin
     for n in FOff[i + 1] do
       MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_OFF, n, 127));
   end;
+
+  MidiOutClose(MO);
+
+  MainForm.Restart;
+end;
+
+//------------------------------------------------------------------------------
+procedure TMainForm.Restart;
+begin
+  Panel1.Visible := True;
+  Panel2.Visible := True;
+  Panel3.Visible := True;
+  Panel4.Visible := True;
+  Canvas.FillRect(Rect(0, 0, ClientWidth, ClientHeight));
+  FState := sMenu;
 end;
 
 end.
