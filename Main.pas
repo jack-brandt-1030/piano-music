@@ -48,10 +48,14 @@ type
     Btn3: TSpeedButton;
     Panel4: TPanel;
     Btn4: TSpeedButton;
+    Panel5: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure BtnClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure Btn1MouseEnter(Sender: TObject);
+    procedure Btn1MouseLeave(Sender: TObject);
     private
+      FInfo: TArray<string>;
       FState: TState;
       FPianoLeft: Integer;
       procedure DrawPiano;
@@ -90,6 +94,13 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   FState := sMenu;
+
+  FInfo := [
+    'Composed in 2001. Sad and relaxing',
+    'Composed in the late 1900s. Beautiful singable angry melody',
+    'Gotta test stuff I guess',
+    'Composed in 1926. Love the part with three voices'
+  ];
 end;
 
 //------------------------------------------------------------------------------
@@ -105,13 +116,16 @@ begin
   for Panel in Panels do begin
     Panel.Width := n;
     Panel.Height := n;
-    Panel.Top := ClientHeight div 2 - n div 2;
+    Panel.Top := 10;
   end;
 
   Panel1.Left := 10;
   Panel2.Left := 10 + n + 10;
   Panel3.Left := 10 + n + 10 + n + 10;
   Panel4.Left := 10 + n + 10 + n + 10 + n + 10;
+
+  Panel5.Top := 10 + n + 10;
+  Panel5.Height := ClientHeight - 10 - (10 + n + 10);
 end;
 
 //------------------------------------------------------------------------------
@@ -128,12 +142,24 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+procedure TMainForm.Btn1MouseEnter(Sender: TObject);
+begin
+  Panel5.Caption := FInfo[(Sender as TSpeedButton).Tag];
+end;
+
+//------------------------------------------------------------------------------
+procedure TMainForm.Btn1MouseLeave(Sender: TObject);
+begin
+  Panel5.Caption := '';
+end;
+
 procedure TMainForm.BtnClick(Sender: TObject);
 begin
   Panel1.Visible := False;
   Panel2.Visible := False;
   Panel3.Visible := False;
   Panel4.Visible := False;
+  Panel5.Visible := False;
   DrawPiano;
   FState := sPlaying;
   TMusicThread.Create(False, TSong((Sender as TSpeedButton).Tag));
@@ -377,6 +403,7 @@ begin
   Panel2.Visible := True;
   Panel3.Visible := True;
   Panel4.Visible := True;
+  Panel5.Visible := True;
   Canvas.FillRect(Rect(0, 0, ClientWidth, ClientHeight));
   FState := sMenu;
 end;
