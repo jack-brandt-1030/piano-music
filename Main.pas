@@ -49,11 +49,12 @@ type
     Panel4: TPanel;
     Btn4: TSpeedButton;
     Panel5: TPanel;
+    Panel6: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure BtnClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure Btn1MouseEnter(Sender: TObject);
-    procedure Btn1MouseLeave(Sender: TObject);
+    procedure MouseEnter(Sender: TObject);
+    procedure MouseLeave(Sender: TObject);
     private
       FInfo: TArray<string>;
       FState: TState;
@@ -116,7 +117,7 @@ begin
   for Panel in Panels do begin
     Panel.Width := n;
     Panel.Height := n;
-    Panel.Top := 10;
+    Panel.Top := Panel6.Height;
   end;
 
   Panel1.Left := 10;
@@ -125,7 +126,7 @@ begin
   Panel4.Left := 10 + n + 10 + n + 10 + n + 10;
 
   Panel5.Top := 10 + n + 10;
-  Panel5.Height := ClientHeight - 10 - (10 + n + 10);
+  Panel5.Height := ClientHeight - Panel6.Height - (10 + n + 10);
 end;
 
 //------------------------------------------------------------------------------
@@ -142,17 +143,18 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-procedure TMainForm.Btn1MouseEnter(Sender: TObject);
+procedure TMainForm.MouseEnter(Sender: TObject);
 begin
   Panel5.Caption := FInfo[(Sender as TSpeedButton).Tag];
 end;
 
 //------------------------------------------------------------------------------
-procedure TMainForm.Btn1MouseLeave(Sender: TObject);
+procedure TMainForm.MouseLeave(Sender: TObject);
 begin
   Panel5.Caption := '';
 end;
 
+//------------------------------------------------------------------------------
 procedure TMainForm.BtnClick(Sender: TObject);
 begin
   Panel1.Visible := False;
@@ -160,6 +162,7 @@ begin
   Panel3.Visible := False;
   Panel4.Visible := False;
   Panel5.Visible := False;
+  Panel6.Visible := False;
   DrawPiano;
   FState := sPlaying;
   TMusicThread.Create(False, TSong((Sender as TSpeedButton).Tag));
@@ -182,6 +185,9 @@ var
   sl: TStringList;
   s: string;
   Duration, LastNote, i, j: Integer;
+
+  Buffer: TNoteArray;
+  Buffer2: TArray<Integer>;
 begin
 
   {Read the file}
@@ -239,6 +245,13 @@ begin
 
   SetLength(Notes, Length(Notes) + 1);
   SetLength(Durations, Length(Durations) + 1);
+
+  {For the animation}
+
+  SetLength(Buffer, 39);
+  SetLength(Buffer2, 39);
+  Notes := Buffer + Notes;
+  Durations := Buffer2 + Durations;
 end;
 
 //------------------------------------------------------------------------------
@@ -264,27 +277,27 @@ begin
   FSong := Song;
 
   if FSong = Comptine then begin
+    FMultiplier := 6;
     FStart := 0;
-    FMultiplier := 4;
-    FSleepTime := 35;
+    FSleepTime := 20;
     Read('comptine_LH', FLH, FLHD);
     Read('comptine_RH', FRH, FRHD);
   end else if FSong = Sviridov then begin
-    FStart := (129 - 1)*2;
-    FMultiplier := 2;
-    FSleepTime := 50;
+    FMultiplier := 4;
+    FStart := (1 - 1)*FMultiplier;
+    FSleepTime := 30;
     Read('sviridov_LH', FLH, FLHD);
     Read('sviridov_RH', FRH, FRHD);
     Read('sviridov_RH2', FRH2, FRHD2);
   end else if FSong = Test then begin
-    FStart := 0;
     FMultiplier := 1;
+    FStart := 0;
     FSleepTime := 100;
     Read('test_LH', FLH, FLHD);
     Read('test_RH', FRH, FRHD);
   end else if FSong = Ivan then begin
-    FStart := 0;
     FMultiplier := 5;
+    FStart := 0;
     FSleepTime := 25;
     Read('ivan_LH', FLH, FLHD);
     Read('ivan_LH2', FLH2, FLHD2);
@@ -391,6 +404,8 @@ begin
       MidiOutShortMsg(MO, MIDIEncodeMessage(MIDI_NOTE_OFF, n, 127));
   end;
 
+  Sleep(200);
+
   MidiOutClose(MO);
 
   MainForm.Restart;
@@ -404,6 +419,7 @@ begin
   Panel3.Visible := True;
   Panel4.Visible := True;
   Panel5.Visible := True;
+  Panel6.Visible := True;
   Canvas.FillRect(Rect(0, 0, ClientWidth, ClientHeight));
   FState := sMenu;
 end;

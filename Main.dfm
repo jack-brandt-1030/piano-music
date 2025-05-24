@@ -7,7 +7,7 @@ object MainForm: TMainForm
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
+  Font.Height = -20
   Font.Name = 'Segoe UI'
   Font.Style = []
   KeyPreview = True
@@ -16,7 +16,7 @@ object MainForm: TMainForm
   OnClick = BtnClick
   OnCreate = FormCreate
   OnResize = FormResize
-  TextHeight = 15
+  TextHeight = 28
   object Panel1: TPanel
     Left = 8
     Top = 8
@@ -38,9 +38,15 @@ object MainForm: TMainForm
       Align = alClient
       Caption = 'Comptine, by Yann Tiersen'
       Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
       OnClick = BtnClick
-      OnMouseEnter = Btn1MouseEnter
-      OnMouseLeave = Btn1MouseLeave
+      OnMouseEnter = MouseEnter
+      OnMouseLeave = MouseLeave
       ExplicitLeft = 216
       ExplicitTop = -24
       ExplicitWidth = 250
@@ -69,9 +75,15 @@ object MainForm: TMainForm
       Align = alClient
       Caption = 'Romance, by Georgy Sviridov'
       Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
       OnClick = BtnClick
-      OnMouseEnter = Btn1MouseEnter
-      OnMouseLeave = Btn1MouseLeave
+      OnMouseEnter = MouseEnter
+      OnMouseLeave = MouseLeave
       ExplicitLeft = 216
       ExplicitTop = -24
       ExplicitWidth = 250
@@ -100,9 +112,15 @@ object MainForm: TMainForm
       Align = alClient
       Caption = 'Test'
       Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
       OnClick = BtnClick
-      OnMouseEnter = Btn1MouseEnter
-      OnMouseLeave = Btn1MouseLeave
+      OnMouseEnter = MouseEnter
+      OnMouseLeave = MouseLeave
       ExplicitLeft = 216
       ExplicitTop = -24
       ExplicitWidth = 250
@@ -131,9 +149,15 @@ object MainForm: TMainForm
       Align = alClient
       Caption = 'Ivan Sings, by Aram Khachaturian'
       Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
       OnClick = BtnClick
-      OnMouseEnter = Btn1MouseEnter
-      OnMouseLeave = Btn1MouseLeave
+      OnMouseEnter = MouseEnter
+      OnMouseLeave = MouseLeave
       ExplicitLeft = 216
       ExplicitTop = -24
       ExplicitWidth = 250
@@ -147,6 +171,28 @@ object MainForm: TMainForm
     Height = 68
     Align = alBottom
     BevelOuter = bvNone
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 4
+  end
+  object Panel6: TPanel
+    Left = 0
+    Top = 0
+    Width = 484
+    Height = 50
+    Align = alTop
+    BevelOuter = bvNone
+    Caption = 'Piano in Delphi!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 5
   end
 end
