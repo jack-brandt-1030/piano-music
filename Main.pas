@@ -97,10 +97,10 @@ begin
   FState := sMenu;
 
   FInfo := [
-    'Composed in 2001. Sad and relaxing. French',
-    'Composed in the late 1900s. Beautiful singable angry melody. Russian',
-    'Variations on a famous melody from the 1800s. Italian',
-    'Composed in 1926. Love the part with three voices. Armenian'
+    'Sad but relaxing - 2001, France',
+    'Beautiful singable angry melody - Late 1900s, Russia',
+    'Variations on a famous melody - 1800s, Italy',
+    'Simple but pretty - 1926, Armenia'
   ];
 end;
 
@@ -290,9 +290,9 @@ begin
     Read('sviridov_RH', FRH, FRHD);
     Read('sviridov_RH2', FRH2, FRHD2);
   end else if FSong = Napoletana then begin
-    FMultiplier := 4;
+    FMultiplier := 6;
     FStart := 0;
-    FSleepTime := 35;
+    FSleepTime := 25;
     Read('napoletana_LH', FLH, FLHD);
     Read('napoletana_RH', FRH, FRHD);
   end else if FSong = Ivan then begin
