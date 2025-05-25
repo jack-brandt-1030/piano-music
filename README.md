@@ -1,1 +1,1 @@
-This project plays Comptine d'un autre été: L'Après-midi by Yann Tiersen, Romance by Georgy Sviridov, Tarantella Napoletana arranged by Augusto Mazzoli, and Iavn Sings by Aram Khachturian - some of my favorite works for piano!
+This project plays Comptine d'un autre été: L'Après-midi by Yann Tiersen, Romance by Georgy Sviridov, Tarantella Napoletana arranged by Augusto Mazzoli, and Ivan Sings by Aram Khachturian - some of my favorite works for piano!
