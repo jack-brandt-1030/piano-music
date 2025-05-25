@@ -1,1 +1,1 @@
-This Delphi project plays "Comptine d'un autre été : L'Après-midi" by Yann Tiersen and "Romance" by Georgy Sviridov
+This project plays Comptine d'un autre été: L'Après-midi by Yann Tiersen, Romance by Georgy Sviridov, Tarantella Napoletana arranged by Augusto Mazzoli, and Ivan Sings by Aram Khachturian - some of my favorite works for piano!
