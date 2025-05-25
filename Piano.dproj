@@ -167,15 +167,15 @@
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>sviridov_RH2</ResourceId>
         </RcItem>
-        <RcItem Include="music\test\LH.txt">
+        <RcItem Include="music\tarantella\LH.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
-            <ResourceId>test_LH</ResourceId>
+            <ResourceId>napoletana_LH</ResourceId>
         </RcItem>
-        <RcItem Include="music\test\RH.txt">
+        <RcItem Include="music\tarantella\Rh.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
-            <ResourceId>test_RH</ResourceId>
+            <ResourceId>napoletana_RH</ResourceId>
         </RcItem>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
@@ -253,13 +253,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="music\test\LH.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="music\tarantella\LH.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="music\test\RH.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="music\tarantella\Rh.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
