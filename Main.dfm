@@ -110,7 +110,7 @@ object MainForm: TMainForm
       Width = 458
       Height = 40
       Align = alClient
-      Caption = 'Test'
+      Caption = 'Tarantella Napoletana'
       Flat = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText

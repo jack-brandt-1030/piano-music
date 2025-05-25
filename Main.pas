@@ -11,7 +11,7 @@ uses
 type
   TState = (sMenu, sPlaying);
 
-  TSong = (Comptine, Sviridov, Test, Ivan);
+  TSong = (Comptine, Sviridov, Napoletana, Ivan);
 
   TNoteArray = TArray<TArray<Integer>>;
 
@@ -25,7 +25,7 @@ type
       FMultiplier: Integer;
       FSleepTime: Integer;
 
-      {I will eventually condense these}
+      {Condense these}
 
       FLH, FRH, FOff, FLH2, FRH2: TNoteArray;
       FLHD, FRHD, FLHD2, FRHD2: TArray<Integer>;
@@ -97,10 +97,10 @@ begin
   FState := sMenu;
 
   FInfo := [
-    'Composed in 2001. Sad and relaxing',
-    'Composed in the late 1900s. Beautiful singable angry melody',
-    'Gotta test stuff I guess',
-    'Composed in 1926. Love the part with three voices'
+    'Composed in 2001. Sad and relaxing. French',
+    'Composed in the late 1900s. Beautiful singable angry melody. Russian',
+    'Variations on a famous melody from the 1800s. Italian',
+    'Composed in 1926. Love the part with three voices. Armenian'
   ];
 end;
 
@@ -200,7 +200,7 @@ begin
 
   i := 0;
   for s in sl do begin
-    if (s <> '') and (s[1] = '*') then
+    if (s <> '') and (s[1] = '.') then
       Notes[i] := [-1]
     else begin
       LastNote := i;
@@ -284,17 +284,17 @@ begin
     Read('comptine_RH', FRH, FRHD);
   end else if FSong = Sviridov then begin
     FMultiplier := 4;
-    FStart := (1 - 1)*FMultiplier;
+    FStart := 0;
     FSleepTime := 30;
     Read('sviridov_LH', FLH, FLHD);
     Read('sviridov_RH', FRH, FRHD);
     Read('sviridov_RH2', FRH2, FRHD2);
-  end else if FSong = Test then begin
-    FMultiplier := 1;
+  end else if FSong = Napoletana then begin
+    FMultiplier := 4;
     FStart := 0;
-    FSleepTime := 100;
-    Read('test_LH', FLH, FLHD);
-    Read('test_RH', FRH, FRHD);
+    FSleepTime := 35;
+    Read('napoletana_LH', FLH, FLHD);
+    Read('napoletana_RH', FRH, FRHD);
   end else if FSong = Ivan then begin
     FMultiplier := 5;
     FStart := 0;
