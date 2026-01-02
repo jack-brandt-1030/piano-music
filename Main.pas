@@ -10,11 +10,8 @@ uses
 
 type
   TState = (sMenu, sPlaying);
-
   TSong = (Comptine, Sviridov, Napoletana, Ivan);
-
   TNoteArray = TArray<TArray<Integer>>;
-
   TMusicThread = class(TThread)
     private
       FNoteToColorDict: TDictionary<Integer, Integer>;
@@ -85,13 +82,11 @@ const
 
 {I should make a note on procedure}
 
-//------------------------------------------------------------------------------
 function MIDIEncodeMessage(Msg, Param1, Param2: Integer): Integer;
 begin
   Result := Msg + (Param1 shl 8) + (Param2 shl 16);
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   FState := sMenu;
@@ -104,7 +99,6 @@ begin
   ];
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.FormResize(Sender: TObject);
 var
   n: Integer;
@@ -129,7 +123,6 @@ begin
   Panel5.Height := ClientHeight - Panel6.Height - (10 + n + 10);
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.DrawPiano;
 var
   i: Integer;
@@ -142,19 +135,16 @@ begin
   end;
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.MouseEnter(Sender: TObject);
 begin
   Panel5.Caption := FInfo[(Sender as TSpeedButton).Tag];
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.MouseLeave(Sender: TObject);
 begin
   Panel5.Caption := '';
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.BtnClick(Sender: TObject);
 begin
   Panel1.Visible := False;
@@ -168,7 +158,6 @@ begin
   TMusicThread.Create(False, TSong((Sender as TSpeedButton).Tag));
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.Draw(a, Note, Color, Height: Integer);
 begin
   Canvas.Brush.Color := Color;
@@ -178,7 +167,6 @@ begin
                        Floor - UnitHeight - UnitHeight*a - UnitHeight*(Height - 1)));
 end;
 
-//------------------------------------------------------------------------------
 procedure TMusicThread.Read(Name: string; var Notes: TNoteArray; var Durations: TArray<Integer>);
 var
   Stream: TResourceStream;
@@ -254,7 +242,6 @@ begin
   Durations := Buffer2 + Durations;
 end;
 
-//------------------------------------------------------------------------------
 constructor TMusicThread.Create(Sus: Boolean; Song: TSong);
 var
   i, j: Integer;
@@ -336,13 +323,11 @@ begin
   FreeOnTerminate := True;
 end;
 
-//------------------------------------------------------------------------------
 procedure TMusicThread.Execute;
 begin
   Play;
 end;
 
-//------------------------------------------------------------------------------
 procedure TMusicThread.Play;
 const
   MIDI_NOTE_ON = $90;
@@ -405,13 +390,10 @@ begin
   end;
 
   Sleep(200);
-
   MidiOutClose(MO);
-
   MainForm.Restart;
 end;
 
-//------------------------------------------------------------------------------
 procedure TMainForm.Restart;
 begin
   Panel1.Visible := True;
