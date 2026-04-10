@@ -2,8 +2,8 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'Music'
-  ClientHeight = 348
-  ClientWidth = 484
+  ClientHeight = 461
+  ClientWidth = 784
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -164,10 +164,10 @@ object MainForm: TMainForm
       ExplicitHeight = 50
     end
   end
-  object Panel5: TPanel
+  object InfoPanel: TPanel
     Left = 0
-    Top = 280
-    Width = 484
+    Top = 393
+    Width = 784
     Height = 68
     Align = alBottom
     BevelOuter = bvNone
@@ -179,10 +179,10 @@ object MainForm: TMainForm
     ParentFont = False
     TabOrder = 4
   end
-  object Panel6: TPanel
+  object UpperPanel: TPanel
     Left = 0
     Top = 0
-    Width = 484
+    Width = 784
     Height = 50
     Align = alTop
     BevelOuter = bvNone
@@ -194,5 +194,74 @@ object MainForm: TMainForm
     Font.Style = []
     ParentFont = False
     TabOrder = 5
+  end
+  object Panel5: TPanel
+    Left = 8
+    Top = 233
+    Width = 468
+    Height = 40
+    BevelOuter = bvNone
+    Color = clLightskyblue
+    Padding.Left = 5
+    Padding.Top = 5
+    Padding.Right = 5
+    Padding.Bottom = 5
+    ParentBackground = False
+    TabOrder = 6
+    object Btn5: TSpeedButton
+      Tag = 4
+      Left = 5
+      Top = 5
+      Width = 458
+      Height = 30
+      Align = alClient
+      Caption = 'Pachelbel'#39's Canon, Extreme (2019)'
+      Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      OnClick = BtnClick
+      OnMouseEnter = MouseEnter
+      OnMouseLeave = MouseLeave
+      ExplicitLeft = 224
+      ExplicitTop = 8
+      ExplicitWidth = 23
+      ExplicitHeight = 22
+    end
+  end
+  object Panel6: TPanel
+    Left = 8
+    Top = 279
+    Width = 468
+    Height = 40
+    BevelOuter = bvNone
+    Color = clLightskyblue
+    ParentBackground = False
+    TabOrder = 7
+    object Btn6: TSpeedButton
+      Tag = 5
+      Left = 0
+      Top = 0
+      Width = 468
+      Height = 40
+      Align = alClient
+      Caption = 'Pachelbel'#39's Canon, Extreme (2016)'
+      Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      OnClick = BtnClick
+      OnMouseEnter = MouseEnter
+      OnMouseLeave = MouseLeave
+      ExplicitLeft = 104
+      ExplicitTop = 24
+      ExplicitWidth = 476
+    end
   end
 end

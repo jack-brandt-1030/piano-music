@@ -8,9 +8,19 @@ uses
   Generics.Collections, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons,
   System.Actions, Vcl.ActnList;
 
+{to do: make it possible to pause}
+{make it possible to quit early}
+{fix how panels are displayed ... make it scrollable?}
+
 type
   TState = (sMenu, sPlaying);
-  TSong = (Comptine, Sviridov, Napoletana, Ivan);
+  TSong = (
+    Comptine,
+    Sviridov,
+    Napoletana,
+    Ivan,
+    Pach19,
+    Pach16);
   TNoteArray = TArray<TArray<Integer>>;
   TMusicThread = class(TThread)
     private
@@ -29,12 +39,17 @@ type
 
       FLHTotal, FRHTotal: TArray<TNoteArray>;
 
-      procedure Read(Name: string; var Notes: TNoteArray; var Durations: TArray<Integer>);
+      procedure Read(
+        Name: string;
+        var Notes: TNoteArray;
+        var Durations: TArray<Integer>);
       procedure Play;
     protected
       constructor Create(Sus: Boolean; Song: TSong);
       procedure Execute; override;
   end;
+
+  {to do: create panels programmatically}
 
   TMainForm = class(TForm)
     Panel1: TPanel;
@@ -45,14 +60,19 @@ type
     Btn3: TSpeedButton;
     Panel4: TPanel;
     Btn4: TSpeedButton;
+    InfoPanel: TPanel;
+    UpperPanel: TPanel;
     Panel5: TPanel;
+    Btn5: TSpeedButton;
     Panel6: TPanel;
+    Btn6: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure BtnClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure MouseEnter(Sender: TObject);
     procedure MouseLeave(Sender: TObject);
     private
+      FPanels: TArray<TPanel>;
       FInfo: TArray<string>;
       FState: TState;
       FPianoLeft: Integer;
@@ -95,32 +115,38 @@ begin
     'Sad but relaxing - 2001, France',
     'Beautiful singable angry melody - Late 1900s, Russia',
     'Variations on a famous melody - 1800s, Italy',
-    'Simple but pretty - 1926, Armenia'
+    'Simple but pretty - 1926, Armenia',
+    'Pachelbel''s Canon but extreme (2019)',
+    'Pachelbel''s Canon but extreme (2016)'
   ];
+
+  {to do: map from int to panel}
+
+  {also to do: don't hard code the captions}
+
+  FPanels := [Panel1, Panel2, Panel3, Panel4, Panel5, Panel6];
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 var
   n: Integer;
-  Panels: TArray<TPanel>;
   Panel: TPanel;
+  Left: Integer;
 begin
-  n := (ClientWidth - 5*10) div 4;
+  n := (ClientWidth - (Length(FPanels) + 1)*10) div Length(FPanels);
 
-  Panels := [Panel1, Panel2, Panel3, Panel4];
-  for Panel in Panels do begin
+  Left := 10;
+
+  for Panel in FPanels do begin
     Panel.Width := n;
     Panel.Height := n;
-    Panel.Top := Panel6.Height;
+    Panel.Top := UpperPanel.Height;
+    Panel.Left := Left;
+    Left := Left + n + 10;
   end;
 
-  Panel1.Left := 10;
-  Panel2.Left := 10 + n + 10;
-  Panel3.Left := 10 + n + 10 + n + 10;
-  Panel4.Left := 10 + n + 10 + n + 10 + n + 10;
-
-  Panel5.Top := 10 + n + 10;
-  Panel5.Height := ClientHeight - Panel6.Height - (10 + n + 10);
+  InfoPanel.Top := 10 + n + 10;
+  InfoPanel.Height := ClientHeight - UpperPanel.Height - (10 + n + 10);
 end;
 
 procedure TMainForm.DrawPiano;
@@ -137,22 +163,23 @@ end;
 
 procedure TMainForm.MouseEnter(Sender: TObject);
 begin
-  Panel5.Caption := FInfo[(Sender as TSpeedButton).Tag];
+  {to do: don't use tag}
+  InfoPanel.Caption := FInfo[(Sender as TSpeedButton).Tag];
 end;
 
 procedure TMainForm.MouseLeave(Sender: TObject);
 begin
-  Panel5.Caption := '';
+  InfoPanel.Caption := '';
 end;
 
 procedure TMainForm.BtnClick(Sender: TObject);
+var
+  Panel: TPanel;
 begin
-  Panel1.Visible := False;
-  Panel2.Visible := False;
-  Panel3.Visible := False;
-  Panel4.Visible := False;
-  Panel5.Visible := False;
-  Panel6.Visible := False;
+  for Panel in FPanels do
+    Panel.Visible := False;
+  UpperPanel.Visible := False;
+  InfoPanel.Visible := False;
   DrawPiano;
   FState := sPlaying;
   TMusicThread.Create(False, TSong((Sender as TSpeedButton).Tag));
@@ -167,7 +194,10 @@ begin
                        Floor - UnitHeight - UnitHeight*a - UnitHeight*(Height - 1)));
 end;
 
-procedure TMusicThread.Read(Name: string; var Notes: TNoteArray; var Durations: TArray<Integer>);
+procedure TMusicThread.Read(
+  Name: string;
+  var Notes: TNoteArray;
+  var Durations: TArray<Integer>);
 var
   Stream: TResourceStream;
   sl: TStringList;
@@ -176,6 +206,8 @@ var
 
   Buffer: TNoteArray;
   Buffer2: TArray<Integer>;
+
+  Note: Integer;
 begin
 
   {Read the file}
@@ -191,11 +223,15 @@ begin
     if (s <> '') and (s[1] = '.') then
       Notes[i] := [-1]
     else begin
-      LastNote := i;
       Duration := FMultiplier;
       j := 1;
       while j < Length(s) do begin
-        Notes[i] := Notes[i] + [StrToInt(s[j] + s[j + 1])];
+
+        Note := StrToInt(s[j] + s[j + 1]);
+        if (Note < LowestNote) or (Note > HighestNote) then
+          Note := LowestNote;
+
+        Notes[i] := Notes[i] + [Note];
         Inc(j, 2);
       end;
     end;
@@ -240,12 +276,13 @@ begin
   SetLength(Buffer2, 39);
   Notes := Buffer + Notes;
   Durations := Buffer2 + Durations;
+
+  Stream.Free;
 end;
 
 constructor TMusicThread.Create(Sus: Boolean; Song: TSong);
 var
   i, j: Integer;
-
   Notes: TNoteArray;
 begin
   inherited Create(Sus);
@@ -289,6 +326,18 @@ begin
     Read('ivan_LH', FLH, FLHD);
     Read('ivan_LH2', FLH2, FLHD2);
     Read('ivan_RH', FRH, FRHD);
+  end else if FSong = Pach19 then begin
+    FMultiplier := 5;
+    FStart := 0;
+    FSleepTime := 5;
+    Read('pach19_LH', FLH, FLHD);
+    Read('pach19_RH', FRH, FRHD);
+  end else if FSong = Pach16 then begin
+    FMultiplier := 5;
+    FStart := 0;
+    FSleepTime := 5;
+    Read('pach16_LH', FLH, FLHD);
+    Read('pach16_RH', FRH, FRHD);
   end;
 
   {Clumsy but it works}
@@ -336,7 +385,6 @@ const
 var
   MO: HMIDIOUT;
   i, n: Integer;
-
   Notes: TNoteArray;
 begin
   MidiOutOpen(@MO, MIDI_DEVICE, 0, 0, CALLBACK_NULL);
@@ -353,7 +401,6 @@ begin
       procedure
       var
         a, n: Integer;
-
         Notes: TNoteArray;
       begin
 
@@ -395,13 +442,13 @@ begin
 end;
 
 procedure TMainForm.Restart;
+var
+  Panel: TPanel;
 begin
-  Panel1.Visible := True;
-  Panel2.Visible := True;
-  Panel3.Visible := True;
-  Panel4.Visible := True;
-  Panel5.Visible := True;
-  Panel6.Visible := True;
+  for Panel in FPanels do
+    Panel.Visible := True;
+  UpperPanel.Visible := True;
+  InfoPanel.Visible := True;
   Canvas.FillRect(Rect(0, 0, ClientWidth, ClientHeight));
   FState := sMenu;
 end;
