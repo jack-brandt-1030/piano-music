@@ -1,1 +1,1 @@
-This project plays Comptine d'un autre été: L'Après-midi by Yann Tiersen, Romance by Georgy Sviridov, Tarantella Napoletana arranged by Augusto Mazzoli, Ivan Sings by Aram Khachturian, and two arrangements of Pachelbel's Canon I made in middle school and high school
+This project plays Comptine d'un autre été: L'Après-midi by Yann Tiersen, Romance by Georgy Sviridov, Tarantella Napoletana arranged by Augusto Mazzoli, Ivan Sings by Aram Khachturian, and two arrangements of Pachelbel's Canon I made in middle school and high school.
