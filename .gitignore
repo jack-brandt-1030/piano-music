@@ -1,6 +1,6 @@
-Piano.dproj.local
-Piano.identcache
-Piano.res
+*.dproj.local
+*.identcache
+*.res
 *.dres
 /Win32
 /__history
